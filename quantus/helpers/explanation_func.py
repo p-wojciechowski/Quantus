@@ -28,7 +28,13 @@ if util.find_spec("tf_explain"):
 from ..helpers import __EXTRAS__
 from .model_interface import ModelInterface
 from .normalise_func import normalise_by_negative
-from .utils import get_baseline_value, infer_channel_first, make_channel_last
+from .utils import (
+    get_baseline_value,
+    infer_channel_first,
+    make_channel_last,
+    TORCH_IS_INSTALLED,
+    TF_IS_INSTALLED,
+)
 
 
 def explain(model, inputs, targets, **kwargs) -> np.ndarray:
@@ -74,7 +80,7 @@ def get_explanation(model, inputs, targets, **kwargs):
         If both are installed, captum is used per default. Setting the xai_lib kwarg to "zennit" uses zennit instead.
     """
     xai_lib = kwargs.get("xai_lib", "captum")
-    if isinstance(model, torch.nn.modules.module.Module):
+    if TORCH_IS_INSTALLED and isinstance(model, torch.nn.modules.module.Module):
         if util.find_spec("captum") and util.find_spec("zennit"):
             if xai_lib == "captum":
                 return generate_captum_explanation(model, inputs, targets, **kwargs)
@@ -84,7 +90,11 @@ def get_explanation(model, inputs, targets, **kwargs):
             return generate_captum_explanation(model, inputs, targets, **kwargs)
         if util.find_spec("zennit"):
             return generate_zennit_explanation(model, inputs, targets, **kwargs)
-    if isinstance(model, tf.keras.Model) and util.find_spec("tf_explain"):
+    if (
+        TF_IS_INSTALLED
+        and isinstance(model, tf.keras.Model)
+        and util.find_spec("tf_explain")
+    ):
         return generate_tf_explanation(model, inputs, targets, **kwargs)
 
     raise ValueError(
