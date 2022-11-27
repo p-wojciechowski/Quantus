@@ -714,19 +714,19 @@ class IterativeRemovalOfFeatures(Metric):
             s_indices = np.argsort(-att_segs)
 
             preds = []
-
+            x_prev_perturbed = x
             for i_ix, s_ix in enumerate(s_indices):
 
                 # Perturb input by indices of attributions.
                 a_ix = np.nonzero((segments == s_ix).flatten())[0]
 
                 x_perturbed = self.perturb_func(
-                    arr=x,
+                    arr=x_prev_perturbed,
                     indices=a_ix,
                     indexed_axes=a_axes,
                     **self.kwargs,
                 )
-                asserts.assert_perturbation_caused_change(x=x, x_perturbed=x_perturbed)
+                asserts.assert_perturbation_caused_change(x=x_prev_perturbed, x_perturbed=x_perturbed)
 
                 # Predict on perturbed input x.
                 x_input = model.shape_input(x_perturbed, x.shape, channel_first=True)
@@ -734,6 +734,7 @@ class IterativeRemovalOfFeatures(Metric):
 
                 # Normalise the scores to be within range [0, 1].
                 preds.append(float(y_pred_perturb / y_pred))
+                x_prev_perturbed = x_perturbed
 
             self.last_results.append(len(preds) - utils.calculate_auc(np.array(preds)))
 
