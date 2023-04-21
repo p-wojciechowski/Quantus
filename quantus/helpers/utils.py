@@ -978,7 +978,7 @@ def offset_coordinates(
     return off_coords[valid], valid
 
 
-def calculate_auc(values: np.array, dx: int = 1):
+def calculate_auc(values: np.array, dx: float = 1.0):
     """
     Calculate area under the curve using the composite trapezoidal rule.
 

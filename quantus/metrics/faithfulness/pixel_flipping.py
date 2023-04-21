@@ -302,7 +302,7 @@ class PixelFlipping(PerturbationMetric):
             preds[i_ix] = y_pred_perturb
 
         if self.return_auc_per_sample:
-            return utils.calculate_auc(preds)
+            return utils.calculate_auc(preds, dx=1/(len(preds)-1))
 
         return preds
 
